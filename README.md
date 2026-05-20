@@ -1,10 +1,10 @@
 <div align="center">
 
-# rashedul-claude-skills
+# rashedul-agentic-engineering
 
-**Personal [Claude Code](https://docs.claude.com/en/docs/claude-code) skills, kept in one place.**
+**My agentic-engineering workbench.**
 
-Drop-in skills for `~/.claude/skills/` — small, composable, version-controlled.
+Personal [Claude Code](https://docs.claude.com/en/docs/claude-code) skills, prompts, and tooling I reuse across projects — small, composable, version-controlled.
 
 </div>
 
@@ -14,10 +14,25 @@ Drop-in skills for `~/.claude/skills/` — small, composable, version-controlled
 
 | Section | |
 |---|---|
-| [Skills](#skills) | What's in the box |
-| [Layout](#layout) | How the repo is structured |
+| [What's here](#whats-here) | Current categories and what's coming |
+| [Skills](#skills) | Drop-in `SKILL.md` folders for Claude Code |
+| [Layout](#layout) | Repo structure |
 | [Install](#install) | Symlink or copy into Claude Code |
 | [Notes](#notes) | Variants, naming collisions, one-off files |
+
+---
+
+## What's here
+
+| Category | Status | Location |
+|---|---|---|
+| **Skills** — Claude Code `SKILL.md` folders | Live | [`skills/`](skills) |
+| **Prompts** — reusable prompts and prompt fragments | Planned | `prompts/` |
+| **Hooks** — Claude Code lifecycle hooks | Planned | `hooks/` |
+| **Configs** — shareable `settings.json` snippets, keybindings | Planned | `configs/` |
+| **Agents** — subagent definitions | Planned | `agents/` |
+
+The repo started as a skills-only collection and is expanding into a broader home for everything I plug into Claude Code. New categories get folders only when I have something to put in them — no empty scaffolding.
 
 ---
 
@@ -124,6 +139,7 @@ cp -R skills/html-output ~/.claude/skills/html-output
 - **Source of truth.** This repo is canonical. Project-local copies elsewhere in `~/Projects/*/.claude/skills/` are historical and may diverge — when in doubt, trust here.
 - **No runtime dependencies.** Skills are plain markdown. They're consumed by Claude Code, not executed.
 - **Adding a new skill.** Drop a folder under `skills/`, give it a `SKILL.md` with `name:` and `description:` in frontmatter, link it from the table above.
+- **Adding a new category.** Create the top-level folder (`prompts/`, `hooks/`, etc.) only when you have real content for it. Update the [What's here](#whats-here) table when you do.
 
 ---
 
