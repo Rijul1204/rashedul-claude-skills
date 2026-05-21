@@ -16,6 +16,7 @@ Personal [Claude Code](https://docs.claude.com/en/docs/claude-code) skills, prom
 |---|---|
 | [What's here](#whats-here) | Current categories and what's coming |
 | [Skills](#skills) | Drop-in `SKILL.md` folders for Claude Code |
+| [Agents](#agents) | Subagent definitions for delegation |
 | [Layout](#layout) | Repo structure |
 | [Install](#install) | Symlink or copy into Claude Code |
 | [Notes](#notes) | Variants, naming collisions, one-off files |
@@ -27,10 +28,10 @@ Personal [Claude Code](https://docs.claude.com/en/docs/claude-code) skills, prom
 | Category | Status | Location |
 |---|---|---|
 | **Skills** — Claude Code `SKILL.md` folders | Live | [`skills/`](skills) |
+| **Agents** — subagent definitions for delegation | Live | [`agents/`](agents) |
 | **Prompts** — reusable prompts and prompt fragments | Planned | `prompts/` |
 | **Hooks** — Claude Code lifecycle hooks | Planned | `hooks/` |
 | **Configs** — shareable `settings.json` snippets, keybindings | Planned | `configs/` |
-| **Agents** — subagent definitions | Planned | `agents/` |
 
 The repo started as a skills-only collection and is expanding into a broader home for everything I plug into Claude Code. New categories get folders only when I have something to put in them — no empty scaffolding.
 
@@ -95,6 +96,17 @@ The repo started as a skills-only collection and is expanding into a broader hom
 
 ---
 
+## Agents
+
+> **[`quality-gates`](agents/quality-gates.md)**
+> Runs the repo's quality gates (lint, format:check, typecheck, knip, scoped vitest) and returns a concise pass/fail report. Delegate after writing or editing TS/TSX so the verbose tool output stays out of the parent context. Read-only — never edits code, never bypasses checks.
+> _Delegate to: `quality-gates` subagent with a scope (which packages were touched, optionally which test files)._
+
+> [!NOTE]
+> `quality-gates` is currently shaped around the [RIXUL-AI](https://github.com/Rijul1204) monorepo (`Personal_Docs/` + `packages/*` + `mobile/`) — the execution recipes and package names are project-specific. Generalize the "Repo layout you need to know" and "Execution recipe" sections before reusing in another repo.
+
+---
+
 ## Layout
 
 ```
@@ -102,25 +114,34 @@ skills/
 └── <skill-name>/
     ├── SKILL.md            # required — YAML frontmatter + body
     └── rules/              # optional — reference files the skill can load
+
+agents/
+└── <agent-name>.md         # YAML frontmatter (name, description, tools, model) + body
 ```
 
-Each skill is a self-contained folder. The `SKILL.md` carries YAML frontmatter (`name`, `description`) that Claude Code reads on startup; the folder name should match the `name:` field so the `/skill-name` invocation resolves cleanly.
+Each **skill** is a self-contained folder; the `SKILL.md` carries YAML frontmatter (`name`, `description`) that Claude Code reads on startup; the folder name should match the `name:` field so the `/skill-name` invocation resolves cleanly.
+
+Each **agent** is a single `.md` file under `agents/`. The frontmatter declares the agent `name`, `description` (used by the parent agent to decide when to delegate), allowed `tools`, and a `model` override.
 
 ---
 
 ## Install
 
-Pick a skill and either symlink (recommended — keeps this repo as the source of truth) or copy it into your Claude skills directory.
+Pick a skill (or agent) and either symlink (recommended — keeps this repo as the source of truth) or copy it into your Claude config directory.
 
 ```bash
-# user-scoped (available in every Claude Code session)
+# skills — user-scoped (available in every Claude Code session)
 ln -s "$PWD/skills/html-output" ~/.claude/skills/html-output
 
-# project-scoped (only inside one repo)
+# skills — project-scoped (only inside one repo)
 ln -s "$PWD/skills/fizzy-tasks" <project>/.claude/skills/fizzy-tasks
+
+# agents — project-scoped (typically; agents are usually tied to a repo's tooling)
+ln -s "$PWD/agents/quality-gates.md" <project>/.claude/agents/quality-gates.md
 
 # or copy instead of symlink
 cp -R skills/html-output ~/.claude/skills/html-output
+cp agents/quality-gates.md <project>/.claude/agents/quality-gates.md
 ```
 
 > [!TIP]
@@ -136,9 +157,10 @@ cp -R skills/html-output ~/.claude/skills/html-output
 
 ## Notes
 
-- **Source of truth.** This repo is canonical. Project-local copies elsewhere in `~/Projects/*/.claude/skills/` are historical and may diverge — when in doubt, trust here.
-- **No runtime dependencies.** Skills are plain markdown. They're consumed by Claude Code, not executed.
+- **Source of truth.** This repo is canonical. Project-local copies elsewhere in `~/Projects/*/.claude/skills/` and `~/Projects/*/.claude/agents/` are historical and may diverge — when in doubt, trust here.
+- **No runtime dependencies.** Skills and agents are plain markdown. They're consumed by Claude Code, not executed.
 - **Adding a new skill.** Drop a folder under `skills/`, give it a `SKILL.md` with `name:` and `description:` in frontmatter, link it from the table above.
+- **Adding a new agent.** Drop a `.md` file under `agents/`, give it `name:` / `description:` / `tools:` / `model:` in frontmatter, link it from the [Agents](#agents) section.
 - **Adding a new category.** Create the top-level folder (`prompts/`, `hooks/`, etc.) only when you have real content for it. Update the [What's here](#whats-here) table when you do.
 
 ---
