@@ -1,6 +1,6 @@
 # cursor-review
 
-A drop-in GitHub Actions workflow that runs the [Cursor Agent](https://docs.cursor.com/agents) against every PR's diff and posts a single sticky review comment (grade + verdict + action items). Manually re-triggerable via `/cursor-review` comment or `workflow_dispatch`.
+A drop-in GitHub Actions workflow that runs the [Cursor Agent](https://docs.cursor.com/agents) against every PR's diff and posts a single sticky review comment (grade + verdict + action items). Manually re-triggerable via `/cursor-review` (or `cursor review`) comment, or `workflow_dispatch`.
 
 ## What's in this folder
 
@@ -41,7 +41,7 @@ The workflow YAML and install script are project-agnostic — only the instructi
 3. **Diff capture.** Computes the diff between the PR base and head SHAs, listing only added/modified files (deletions excluded).
 4. **Prompt assembly.** Concatenates the instructions file (expanding `{{MODULE:...}}` references) with the file list and the diff.
 5. **Cursor invocation.** Pipes the prompt into `cursor-agent --trust --output-format text`. 10-minute hard timeout.
-6. **Sticky comment.** Searches existing PR comments for a `<!-- cursor-review-comment -->` marker; updates if present, otherwise creates a new one. Avoids stacking comments across re-runs.
+6. **Sticky comment.** Searches existing PR comments for a `<!-- cursor-auto-review-bot -->` HTML-comment marker; updates if present, otherwise creates a new one. Avoids stacking comments across re-runs.
 
 ## Requirements
 
@@ -59,7 +59,13 @@ The `instructions/code-review.instructions.md` file becomes the system-level rub
 
 ## Re-triggering a review on an open PR
 
-Drop a `/cursor-review` comment on the PR. Or, from the CLI:
+Drop one of these comments on the PR:
+
+- `/cursor-review`
+- `cursor review`
+- `cursor review this code`
+
+All three phrases match. Or, from the CLI:
 
 ```bash
 gh workflow run cursor_review.yml -f pr_number=123

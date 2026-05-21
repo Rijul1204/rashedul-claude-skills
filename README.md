@@ -4,7 +4,7 @@
 
 **My agentic-engineering workbench.**
 
-Personal [Claude Code](https://docs.claude.com/en/docs/claude-code) skills, prompts, and tooling I reuse across projects — small, composable, version-controlled.
+Personal [Claude Code](https://docs.claude.com/en/docs/claude-code) skills, subagents, and CI workflows I reuse across projects — small, composable, version-controlled.
 
 </div>
 
@@ -12,14 +12,14 @@ Personal [Claude Code](https://docs.claude.com/en/docs/claude-code) skills, prom
 
 ## Contents
 
-| Section | |
+| Section | Purpose |
 |---|---|
 | [What's here](#whats-here) | Current categories and what's coming |
 | [Skills](#skills) | Drop-in `SKILL.md` folders for Claude Code |
 | [Agents](#agents) | Subagent definitions for delegation |
 | [Workflows](#workflows) | Drop-in GitHub Actions templates for other repos |
 | [Layout](#layout) | Repo structure |
-| [Install](#install) | Symlink or copy into Claude Code |
+| [Install](#install) | How to use these in your own setup |
 | [Notes](#notes) | Variants, naming collisions, one-off files |
 
 ---
@@ -153,7 +153,9 @@ Each **workflow** lives under `workflows/<workflow-name>/` and contains a comple
 
 ## Install
 
-Pick a skill (or agent) and either symlink (recommended — keeps this repo as the source of truth) or copy it into your Claude config directory.
+### Skills and agents
+
+Pick one and either symlink (recommended — keeps this repo as the source of truth) or copy it into your Claude config directory.
 
 ```bash
 # skills — user-scoped (available in every Claude Code session)
@@ -169,6 +171,12 @@ ln -s "$PWD/agents/quality-gates.md" <project>/.claude/agents/quality-gates.md
 cp -R skills/html-output ~/.claude/skills/html-output
 cp agents/quality-gates.md <project>/.claude/agents/quality-gates.md
 ```
+
+### Workflows
+
+Each workflow ships its own install steps — see the per-workflow README:
+
+- [`workflows/cursor-review/README.md`](workflows/cursor-review/README.md) — drop the inner `.github/` tree into your target repo's root, replace the rubric, set `CURSOR_API_KEY`.
 
 > [!TIP]
 > Symlinks let you `git pull` here once and have every install pick up the change.
