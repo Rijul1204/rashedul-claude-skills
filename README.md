@@ -1,8 +1,8 @@
 <div align="center">
 
-# rashedul-agentic-engineering
+<img src=".github/assets/logo.png" alt="Rashedul Agentic Engineering — Agentic Workbench" width="480">
 
-**My agentic-engineering workbench.**
+# rashedul-agentic-engineering
 
 Personal [Claude Code](https://docs.claude.com/en/docs/claude-code) skills, subagents, and CI workflows I reuse across projects — small, composable, version-controlled.
 
@@ -104,8 +104,8 @@ The repo started as a skills-only collection and is expanding into a broader hom
 > Runs the repo's quality gates (lint, format:check, typecheck, knip, scoped vitest) and returns a concise pass/fail report. Delegate after writing or editing TS/TSX so the verbose tool output stays out of the parent context. Read-only — never edits code, never bypasses checks.
 > _Delegate to: `quality-gates` subagent with a scope (which packages were touched, optionally which test files)._
 
-> [!NOTE]
-> `quality-gates` is currently shaped around the [RIXUL-AI](https://github.com/Rijul1204) monorepo (`Personal_Docs/` + `packages/*` + `mobile/`) — the execution recipes and package names are project-specific. Generalize the "Repo layout you need to know" and "Execution recipe" sections before reusing in another repo.
+> [!TIP]
+> `quality-gates` ships generic — it discovers `lint` / `format:check` / `typecheck` / `knip` / `test` scripts from `package.json` and adapts. If your repo uses a non-pnpm workspace manager or has custom gates, fill in the "Project-specific tuning" section at the bottom of the agent file.
 
 ---
 
