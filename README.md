@@ -55,6 +55,12 @@ The repo started as a skills-only collection and is expanding into a broader hom
 > Coordinate an async file-based design / code review with a peer agent (Codex, another Claude, or a human reviewer) through a shared markdown thread. Seeds the file, drives the pyramid-principle response shape, monitors for peer appends, implements + quality-gates any code change the thread converges on, and detects "Final ACK" close-out.
 > _Trigger: "review this with Codex", "open a peer review thread", "respond to Codex on `<thread>.md`", or naming any `*-review-thread.md` path._
 
+### Vendor integrations
+
+> **[`recall-ai-integration`](skills/recall-ai-integration/SKILL.md)**
+> Modular vendor knowledge for [Recall.ai](https://recall.ai) (meeting bots, status + realtime webhooks) plus the closely-coupled ElevenLabs surfaces (Scribe for transcription, Voice for TTS). Bundles a 10-file [`references/`](skills/recall-ai-integration/references) library with verbatim wire contracts, a tri-site nesting gotcha catalog, spec-faithful webhook fixtures, and full feature / bug-fix workflows. Enforces docs → probe → fixture → code with date-stamped `[Doc check]` comments at every call site to prevent schema-drift outages.
+> _Trigger: any mention of Recall.ai, `RECALL_API_KEY`, `in_call_recording`, `transcript.data`, Svix verification, `us-west-2.recall.ai`, ElevenLabs, Scribe, `xi-api-key`, `voice_id`, or new code dispatching / commanding / handling webhooks from a Recall bot._
+
 ### Fizzy Kanban toolkit
 
 > **[`fizzy-product-manager`](skills/fizzy-product-manager/SKILL.md)**
