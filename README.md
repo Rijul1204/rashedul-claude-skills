@@ -175,7 +175,18 @@ Each **workflow** lives under `workflows/<workflow-name>/` and contains a comple
 
 ### Skills and agents
 
-Pick one and either symlink (recommended — keeps this repo as the source of truth) or copy it into your Claude config directory.
+**One-shot install (everything):**
+
+```bash
+./scripts/install.sh                            # user-scope (~/.claude/), symlink, all categories
+./scripts/install.sh --target ~/Projects/foo    # project-scope (<target>/.claude/)
+./scripts/install.sh --only skills --dry-run    # preview only — no filesystem changes
+./scripts/install.sh --copy --force             # snapshot copy, overwrite existing
+```
+
+Run from the repo root. The script symlinks (or copies) every `skills/<name>/` and `agents/*.md` into the target's `.claude/` tree. Existing targets are skipped with a warning unless `--force` is passed.
+
+**Per-item install** (when you only want one):
 
 ```bash
 # skills — user-scoped (available in every Claude Code session)
