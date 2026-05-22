@@ -55,6 +55,16 @@ The repo started as a skills-only collection and is expanding into a broader hom
 > Coordinate an async file-based design / code review with a peer agent (Codex, another Claude, or a human reviewer) through a shared markdown thread. Seeds the file, drives the pyramid-principle response shape, monitors for peer appends, implements + quality-gates any code change the thread converges on, and detects "Final ACK" close-out.
 > _Trigger: "review this with Codex", "open a peer review thread", "respond to Codex on `<thread>.md`", or naming any `*-review-thread.md` path._
 
+### Spec & delivery planning
+
+> **[`srs-documentation`](skills/srs-documentation/SKILL.md)**
+> Write a formal Software Requirements Specification following the IEEE 830 standard structure. Walks the full template (Introduction, Overall Description, Specific Requirements, Appendices), enforces requirement quality (necessary, unambiguous, verifiable, traceable, MoSCoW-prioritized), and ships a [`template.md`](skills/srs-documentation/template.md) + [`checklists.md`](skills/srs-documentation/checklists.md) you can copy for any new spec.
+> _Trigger: "write an SRS", "draft a requirements doc", "IEEE 830 spec", "formal requirements for `<feature>`"._
+
+> **[`srs-to-delivery-plan`](skills/srs-to-delivery-plan/SKILL.md)**
+> Convert an SRS into EPICs → STORIES → TASKS → SPRINT PLAN using vertical-slicing (tracer-bullet) principles. Enforces end-to-end thin slices over horizontal layer-by-layer work, classifies stories as HITL vs AFK, prescribes the 10 required fields per TASK (Context, Problem, Scope, DoD, Acceptance, Testing, Validation, Key Files, Implementation Notes, Framework Integration), and ends with a sprint plan and GitHub-issue creation flow.
+> _Trigger: "break this SRS into stories", "make a delivery plan", "epic / story / task breakdown", "sprint plan for `<feature>`"._
+
 ### Vendor integrations
 
 > **[`recall-ai-integration`](skills/recall-ai-integration/SKILL.md)**
