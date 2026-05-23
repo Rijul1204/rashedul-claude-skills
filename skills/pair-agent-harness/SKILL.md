@@ -1,23 +1,31 @@
 ---
-name: file-review-dialogue
-description: Run an asynchronous file-based review with a peer agent (typically OpenAI Codex, another Claude, or a human reviewer) through a shared markdown thread. Use when the user says "review this with Codex", "open a Codex thread", "respond to Codex", "open a peer review", "monitor this review file", names a *-review-thread.md or *-dialogue-thread.md, or wants to coordinate a structured async back-and-forth between two AI agents on a code or design question. Seeds the file from a template if missing, appends a numbered Claude response under its own section header, arms a file-mtime monitor so each peer append triggers a fresh read + response, drives the pyramid-principle response shape (position first, justification second), detects consensus markers like "Final ACK" / "No further objections", and implements + quality-gates any code changes the thread converges on.
+name: pair-agent-harness
+description: Harness two AI agents (typically Claude + OpenAI Codex, or two Claudes, or an agent + human reviewer) into a Reviewer / Implementor pair that collaborate asynchronously through a shared markdown thread. One agent reviews / critiques / asks pointed questions; the other implements / responds / drives the code changes; the file mediates. Use when the user says "pair another agent on this", "harness Codex on this", "review this with Codex", "open a Codex thread", "respond to Codex", "open a peer review", "monitor this review file", names a *-review-thread.md or *-dialogue-thread.md, or wants to coordinate structured async back-and-forth between two AI agents on a code or design question. Seeds the file from a template if missing, appends a numbered Claude response under its own section header, arms a file-mtime monitor so each peer append triggers a fresh read + response, drives the pyramid-principle response shape (position first, justification second), detects consensus markers like "Final ACK" / "No further objections", and implements + quality-gates any code changes the thread converges on.
 ---
 
-# File Review Dialogue
+# Pair-Agent Harness
 
-Async review with a peer agent (Codex / another Claude / human reviewer) through a shared markdown thread. Each side appends responses under its own dated section header; Claude monitors the file for changes, drafts the next response, and acts on consensus.
+A coordination harness for two AI agents working in **complementary roles** on a shared markdown file. The two canonical roles are:
 
-The thread is the single source of truth — both agents read the whole file before responding, append (never overwrite), and converge on decisions in writing. This decouples the two agents from each other's runtime: neither has to be online at the same time.
+- **Reviewer** — critiques, challenges assumptions, asks pointed questions, ratifies decisions.
+- **Implementor** — proposes designs, implements code changes, responds to critique, runs quality gates.
+
+The roles swap per topic — when Claude opens the thread with findings + questions for Codex, Claude is the Implementor / Codex is the Reviewer. When Codex opens the thread asking for review of a Codex-generated patch, the roles flip. The harness doesn't pin roles; it pins the **discipline**: one agent appends at a time, each side reads the whole file before responding, the markdown thread is the single source of truth.
+
+This decouples the two agents from each other's runtime: neither has to be online at the same time. The Implementor can land code changes between rounds; the Reviewer can take a day to think; the file persists across both sessions.
 
 ## When to invoke
 
 Fire on:
+
+- User says "pair another agent on this", "harness Codex on this", "pair me with Codex on this design".
 - User says "review this with Codex", "open a Codex review", "let's get Codex's take on this".
 - User says "open a peer review", "get a second pair of eyes on this", "ping another Claude on this".
 - User points at an existing `*-review-thread.md` / `*-dialogue-thread.md` and says "respond" / "continue" / "monitor".
-- User says "monitor this file" with a path that looks like a review thread.
+- User says "monitor this file" with a path that looks like a pair-agent thread.
 
 Do NOT fire on:
+
 - One-off code review by a single agent (use a normal code-review subagent instead).
 - Synchronous chat or pair-programming (no file involved).
 - Generic file-watching for build artifacts / logs (use the Monitor tool directly).
@@ -59,11 +67,16 @@ If the file already exists and contains a peer-opened section (e.g. `## Codex (O
 
 Print the absolute file path back to the user once seeded so they can hand it to the peer agent.
 
-## Step 2: Read and respond
+## Step 2: Read the whole thread, then respond in role
 
-Always read the **whole** file before drafting. Stale assumptions about earlier sections are the most common review-thread bug.
+Always read the **whole** file before drafting. Stale assumptions about earlier sections are the most common pair-thread bug.
 
-Drafting rules:
+Pick your role for this round:
+
+- If the latest peer section asked questions or critiqued a design, you're acting as **Implementor**: address the critique, defend or revise the design, and (if consensus is near) implement the code change.
+- If the latest peer section proposed a design or landed a patch, you're acting as **Reviewer**: critique the proposal, name the load-bearing assumptions, ask pointed questions, ratify or push back.
+
+Drafting rules (apply in either role):
 
 - **Pyramid principle.** Lead with one of: "Aligned." / "Aligned with one correction." / "Partially aligned — three deltas." / "Disagree on X." The peer should know your position from sentence one. Justify after.
 - **Pick the next section header.** Scan the file for the most recent `## Claude *` heading; the new one uses the next numbered slot:
@@ -112,7 +125,7 @@ Claude Code's `Monitor` tool fires notifications as real conversation messages �
 
 This asymmetry is benign — both sides land replies eventually — but the user shouldn't be surprised when one side appears silent until they ping it.
 
-## Step 4: Act on consensus
+## Step 4: When playing the Implementor role, act on consensus
 
 When the thread converges on a code change — both sides agree on a specific edit, with file path + value or shape — implement it BEFORE the next response:
 
@@ -159,7 +172,7 @@ If the peer keeps posting after your Final ACK with substantive disagreement, tr
 ### Example 1: User says "review the cancel-event change with Codex"
 
 1. Pick a path: `.dialogue/cancel-event-review-thread.md` (or wherever the repo's convention puts design threads).
-2. Seed the file with Claude's findings (the cancel-event design + 2-3 questions for Codex).
+2. Seed the file with Claude's findings (the cancel-event design + 2-3 questions for Codex). Claude is playing **Implementor**; Codex will play **Reviewer**.
 3. Print the path back: *"Seeded at `<path>`. Hand this prompt to Codex: 'Read `<path>`. Respond in `## Codex Response`. If you disagree with any part, explain in the thread.'"*
 4. Arm the monitor.
 
@@ -167,9 +180,10 @@ If the peer keeps posting after your Final ACK with substantive disagreement, tr
 
 1. Read the existing file.
 2. Find the peer's latest section. Identify what's new.
-3. Append `## Claude Follow-Up <N> - <date>` with pyramid-shape response.
-4. If the change the peer is asking for is a code edit AND Claude agrees: make the edit, run gates, then append.
-5. Re-arm the monitor (or note it's already armed).
+3. Decide the role for this round (Reviewer if Codex just landed a patch; Implementor if Codex critiqued a design).
+4. Append `## Claude Follow-Up <N> - <date>` with pyramid-shape response.
+5. If you're acting as Implementor AND the change Codex is asking for is a code edit AND Claude agrees: make the edit, run gates, then append.
+6. Re-arm the monitor (or note it's already armed).
 
 ### Example 3: User says "we're done, push the changes"
 
@@ -183,10 +197,12 @@ If the peer keeps posting after your Final ACK with substantive disagreement, tr
 
 **Peer's section uses an unexpected header pattern.** Stay flexible — match the header shape they use (e.g. `## Codex (OpenAI) - Findings - <date>` vs `## Codex - Initial Take`). Use your own consistent pattern for Claude headers.
 
-**Two threads diverge in opinion.** Don't try to force a single answer. State the disagreement explicitly in your section, list the tradeoffs in a table, and ask the user to break the tie if both peers stay deadlocked after two rounds.
+**Two agents diverge in opinion.** Don't try to force a single answer. State the disagreement explicitly in your section, list the tradeoffs in a table, and ask the user to break the tie if both peers stay deadlocked after two rounds.
 
 **File has hundreds of lines and is hard to scan.** Append a status table to your latest Claude section that summarizes where every thread item stands (Landed / Queued / Disputed / Resolved). This is what convergence looks like in long threads.
 
 **Quality gates fail after the agreed change.** Treat the fail as a re-opener of the thread, not a private problem. Append a section explaining what broke, what the fix is, and whether the original consensus still holds.
 
 **A tangential bug surfaces inside the thread.** Don't fold it into the current decision — spin a separate `<other-topic>-review-thread.md` so each thread converges on a single decision instead of dragging.
+
+**Roles are blurring (same agent reviewing + implementing in one round).** That's normal at convergence — the Implementor finishes the change, runs gates, and ratifies their own status table. But if it's happening every round, the harness has degraded into a monologue; ask the user whether the peer is actually engaged.

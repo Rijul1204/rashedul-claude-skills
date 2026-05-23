@@ -47,7 +47,7 @@ The repo started as a skills-only collection and is expanding into a broader hom
 
 | Group | Skills |
 |---|---|
-| [General-purpose](#general-purpose) | [`html-output`](skills/html-output/SKILL.md) &middot; [`grill-me`](skills/grill-me/SKILL.md) &middot; [`grill-me-codex`](skills/grill-me-codex/SKILL.md) &middot; [`file-review-dialogue`](skills/file-review-dialogue/SKILL.md) &middot; [`handoff`](skills/handoff/SKILL.md) |
+| [General-purpose](#general-purpose) | [`html-output`](skills/html-output/SKILL.md) &middot; [`grill-me`](skills/grill-me/SKILL.md) &middot; [`grill-me-codex`](skills/grill-me-codex/SKILL.md) &middot; [`pair-agent-harness`](skills/pair-agent-harness/SKILL.md) &middot; [`handoff`](skills/handoff/SKILL.md) |
 | [Spec & delivery planning](#spec--delivery-planning) | [`srs-documentation`](skills/srs-documentation/SKILL.md) &middot; [`srs-to-delivery-plan`](skills/srs-to-delivery-plan/SKILL.md) |
 | [Vendor integrations](#vendor-integrations) | [`recall-ai-integration`](skills/recall-ai-integration/SKILL.md) |
 | [Fizzy Kanban toolkit](#fizzy-kanban-toolkit) | [`fizzy-product-manager`](skills/fizzy-product-manager/SKILL.md) &middot; [`fizzy-tasks`](skills/fizzy-tasks/SKILL.md) &middot; [`fizzy-board-monitor`](skills/fizzy-board-monitor/SKILL.md) &middot; [`fizzy-write`](skills/fizzy-write/SKILL.md) |
@@ -62,9 +62,9 @@ The repo started as a skills-only collection and is expanding into a broader hom
 > Interview you relentlessly about a plan until each decision is explicit and defensible. Two flavors: a terse short version and a longer workflow-driven version that ends with a decision summary or blocker list.
 > _Trigger: `/grill-me`, "stress-test this plan", "grill me on the design"._
 
-> **[`file-review-dialogue`](skills/file-review-dialogue/SKILL.md)**
-> Coordinate an async file-based design / code review with a peer agent (Codex, another Claude, or a human reviewer) through a shared markdown thread. Seeds the file, drives the pyramid-principle response shape, monitors for peer appends, implements + quality-gates any code change the thread converges on, and detects "Final ACK" close-out.
-> _Trigger: "review this with Codex", "open a peer review thread", "respond to Codex on `<thread>.md`", or naming any `*-review-thread.md` path._
+> **[`pair-agent-harness`](skills/pair-agent-harness/SKILL.md)**
+> Harness two AI agents into a **Reviewer + Implementor** pair collaborating asynchronously through a shared markdown thread. One side critiques, the other implements + quality-gates the change; the file mediates. Seeds the thread, drives pyramid-principle responses, monitors for peer appends, runs the touched-scope quality gates after every agreed code change, and detects "Final ACK" close-out.
+> _Trigger: "pair another agent on this", "harness Codex on this", "review this with Codex", "open a peer review thread", "respond to Codex on `<thread>.md`", or naming any `*-review-thread.md` path._
 
 > **[`handoff`](skills/handoff/SKILL.md)**
 > Compact the current conversation into a structured handoff doc in `/tmp/` so a fresh agent can resume the work without losing context. References (never duplicates) PRs / plans / design docs / memory entries; redacts secrets; ships a mandatory "suggested skills" section so the next session re-boots cleanly. Inspired by [Matt Pocock's handoff skill](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md).

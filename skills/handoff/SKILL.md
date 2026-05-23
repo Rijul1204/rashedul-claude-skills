@@ -147,8 +147,8 @@ loads the full index from MEMORY.md on session start.>
 
 <Mandatory section. Table: skill name × why this session needs it.
 Order by likely-first-invoked. Include the user-feedback skills
-(`grill-me` before finalising plans, `file-review-dialogue` for Codex
-threads, etc.) that match the mission.>
+(`grill-me` before finalising plans, `pair-agent-harness` for Codex /
+peer-review threads, etc.) that match the mission.>
 
 ## Open questions / decisions for the next session
 
@@ -215,7 +215,7 @@ The most recently written handoff (a worked example you can mimic) is at the pat
 - **Dumping the full memory index.** Cite only the entries that shaped recent decisions; `MEMORY.md` loads automatically on session start.
 - **Mid-conversation handoff** ("checkpoint and continue"). Handoff is a session-boundary ritual. If you want a status pin without ending the session, just summarise in chat.
 - **Asking the user to fill in details before writing.** The whole point of handoff is the user is checking out. Mine the state yourself; the only acceptable question is one-line clarification of the mission when truly ambiguous.
-- **Skipping the "suggested skills" section.** Even when no skill obviously applies, suggest the closest ones (`grill-me` for plans, `file-review-dialogue` for any peer review, the most-recently-used domain skill). This section is what makes handoffs *re-bootable*.
+- **Skipping the "suggested skills" section.** Even when no skill obviously applies, suggest the closest ones (`grill-me` for plans, `pair-agent-harness` for any peer review, the most-recently-used domain skill). This section is what makes handoffs *re-bootable*.
 - **Skipping redaction.** Even if the conversation didn't visibly contain secrets, the next agent might widen access; scan systematically.
 
 ## Validation checklist
