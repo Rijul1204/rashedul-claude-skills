@@ -42,6 +42,15 @@ The repo started as a skills-only collection and is expanding into a broader hom
 
 ## Skills
 
+12 skills across four groups. Jump to any card below for details.
+
+| Group | Skills |
+|---|---|
+| [General-purpose](#general-purpose) | [`html-output`](skills/html-output/SKILL.md) &middot; [`grill-me`](skills/grill-me/SKILL.md) &middot; [`grill-me-codex`](skills/grill-me-codex/SKILL.md) &middot; [`file-review-dialogue`](skills/file-review-dialogue/SKILL.md) &middot; [`handoff`](skills/handoff/SKILL.md) |
+| [Spec & delivery planning](#spec--delivery-planning) | [`srs-documentation`](skills/srs-documentation/SKILL.md) &middot; [`srs-to-delivery-plan`](skills/srs-to-delivery-plan/SKILL.md) |
+| [Vendor integrations](#vendor-integrations) | [`recall-ai-integration`](skills/recall-ai-integration/SKILL.md) |
+| [Fizzy Kanban toolkit](#fizzy-kanban-toolkit) | [`fizzy-product-manager`](skills/fizzy-product-manager/SKILL.md) &middot; [`fizzy-tasks`](skills/fizzy-tasks/SKILL.md) &middot; [`fizzy-board-monitor`](skills/fizzy-board-monitor/SKILL.md) &middot; [`fizzy-write`](skills/fizzy-write/SKILL.md) |
+
 ### General-purpose
 
 > **[`html-output`](skills/html-output/SKILL.md)**
