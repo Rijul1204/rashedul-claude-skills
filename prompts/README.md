@@ -25,6 +25,7 @@ Anti-patterns: anything project-specific (lives in that project's CLAUDE.md), an
 |---|---|
 | [`pyramid-response.md`](pyramid-response.md) | Forces pyramid-principle responses — recommendation in sentences 1-3, justification after. |
 | [`docs-probe-before-code.md`](docs-probe-before-code.md) | Pre-arms a third-party-integration conversation to follow docs → probe → fixture → code. |
+| [`sprint-execution-protocol.md`](sprint-execution-protocol.md) | Multi-step delivery contract: per-task fields, confidence scoring, three-lens review, sprint-end validation gate. Composes with `srs-to-delivery-plan`, `grill-me`, `quality-gates`. |
 
 ## How to use
 

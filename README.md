@@ -154,6 +154,9 @@ Paste-ready prompt fragments — one rule per file, kebab-case name, body is the
 > **[`docs-probe-before-code`](prompts/docs-probe-before-code.md)**
 > Pre-arms a third-party-integration conversation to follow **docs → probe → fixture → code** instead of guessing schemas from training-data memory. Every new call site gets a date-stamped `[Doc check YYYY-MM-DD: <URL>]` comment.
 
+> **[`sprint-execution-protocol`](prompts/sprint-execution-protocol.md)**
+> Multi-step delivery contract for running a sprint-shaped plan. Every task carries Context / Scope / DoD / Acceptance Criteria / Testing Step, gets a confidence score (< 90% triggers a `grill-me` escalation), passes three review lenses (senior engineer, product engineer, UI/UX), and the whole sprint passes a UI walk-through + server-log + API + quality-gates validation before the user's go-ahead unlocks the next sprint. Composes with [`srs-to-delivery-plan`](skills/srs-to-delivery-plan/SKILL.md), [`grill-me`](skills/grill-me/SKILL.md), [`quality-gates`](agents/quality-gates.md), [`pair-agent-harness`](skills/pair-agent-harness/SKILL.md), and [`handoff`](skills/handoff/SKILL.md).
+
 ---
 
 ## Workflows
