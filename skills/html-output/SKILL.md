@@ -7,12 +7,7 @@ description: Convert the current plan, spec, design doc, or conversation context
 
 Render the current plan, spec, design doc, or conversation context as **one self-contained HTML file** that conveys the information more densely than markdown can — tables, inline SVG diagrams, semantic structure, in-page navigation, mobile-responsive layout, no external runtime dependencies.
 
-**Background.** Two prompts that planted this skill:
-
-- Thariq Shihipar, *"Using Claude Code: The Unreasonable Effectiveness of HTML"* — markdown caps out around ~100 lines of readability; HTML scales further and is easy to share.
-- Andrej Karpathy ([x.com/karpathy/status/2053872850101285137](https://x.com/karpathy/status/2053872850101285137)) — *"at the end of your query ask your LLM to 'structure your response as HTML', then view the generated file in your browser. I've also had some success asking the LLM to present its output as slideshows, etc."*
-
-Both lean on the same observation: a browser-rendered single file delivers more density and shareability than any markdown reader. This skill formalizes the pattern — picks the source, picks the output shape (long-form doc vs. slide deck vs. dashboard), and writes the file.
+*See [README.md](README.md) for the sources that inspired this skill (Thariq Shihipar, Andrej Karpathy) and a before/after demo.*
 
 This skill owns *what* to convert and *where* to put the file. Visual quality (typography, color, motion, layout polish) is delegated to the `frontend-design` skill — if it's installed, treat this skill as composing on top of it. Otherwise default to a clean modern editorial style.
 
