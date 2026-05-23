@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Open a PR directly
+    url: https://github.com/Rijul1204/rashedul-agentic-engineering/compare
+    about: For typos or single-line fixes, a PR is faster than an issue.
+  - name: Read CONTRIBUTING.md
+    url: https://github.com/Rijul1204/rashedul-agentic-engineering/blob/main/CONTRIBUTING.md
+    about: Conventions, artifact layout, generalization PRs, and house style.

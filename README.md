@@ -22,6 +22,7 @@ Personal [Claude Code](https://docs.claude.com/en/docs/claude-code) skills, suba
 | [Layout](#layout) | Repo structure |
 | [Install](#install) | How to use these in your own setup |
 | [Notes](#notes) | Variants, naming collisions, one-off files |
+| [Contributing & feedback](#contributing--feedback) | How to suggest, file issues, open PRs |
 
 ---
 
@@ -259,6 +260,21 @@ Each workflow ships its own install steps — see the per-workflow README:
 - **Adding a new prompt.** Drop a `.md` file under `prompts/`, kebab-case name, body is the prompt text. Optional YAML frontmatter (`name`, `description`). Link from the [Prompts](#prompts) section. See [`prompts/README.md`](prompts/README.md) for the full convention.
 - **Adding a new workflow template.** Create `workflows/<name>/` with a `README.md` and a `.github/` subtree. Keep the inner `.github/` one level down so this repo's own Actions runner ignores it.
 - **Adding a new category.** Create the top-level folder (`hooks/`, `configs/`, etc.) only when you have real content for it. Update the [What's here](#whats-here) table when you do.
+
+---
+
+## Contributing & feedback
+
+Issues and PRs are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md) for the format expected and the kinds of contributions that fit.
+
+| If you want to… | Do this |
+|---|---|
+| Suggest a new skill, agent, prompt, or workflow | [Open a *Skill / artifact suggestion* issue](../../issues/new?template=skill-suggestion.md) |
+| Report a broken link, frontmatter error, typo, or install-script bug | [Open a *Bug or doc fix* issue](../../issues/new?template=bug-or-doc-fix.md) |
+| Contribute a skill or improvement directly | [Open a PR](../../compare) — the PR template walks the checklist |
+| Generalize one of the project-coupled artifacts (`recall-ai-integration`, `quality-gates`) for other stacks | PR welcome — see [CONTRIBUTING.md § Generalization PRs](CONTRIBUTING.md#generalization-prs) |
+
+For typos or single-line fixes, a PR is faster than an issue.
 
 ---
 
