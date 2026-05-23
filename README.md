@@ -27,6 +27,10 @@ The artifacts in this repo are designed to **flip the polarity**: turn the agent
 
 **Thesis**: an AI peer that pushes back catches the failure modes an order-taking AI would happily ship. Adopt these artifacts when you'd rather the agent ask "why?" once than implement the wrong thing three times.
 
+<p align="center">
+  <img src=".github/assets/peer-not-executor.png" alt="Order-taker (default mode) vs peer programmer (pushes back): the order-taker loops document to code to rework; the peer programmer routes input through a central question node expanding into five lenses (clarifies goals, explores alternatives, validates assumptions, aligns on decisions, ratifies output) before arriving at code. Bottom strap reads: fewer wrong turns to better decisions to better outcomes." width="820">
+</p>
+
 ---
 
 ## Contents
