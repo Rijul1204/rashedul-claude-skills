@@ -9,7 +9,7 @@ Compact the current conversation into a single self-contained Markdown document 
 
 The handoff doc is a **briefing**, not a transcript. It references — never duplicates — content that already lives in other artifacts (PRs, plans, design docs, commits, memory entries, ADRs, issue trackers).
 
-> **Inspired by** Matt Pocock's [`handoff`](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md) skill. This version extends his with explicit redaction rules, a mandatory "suggested skills" section, and a stricter "reference, don't duplicate" discipline.
+*See [README.md](README.md) for the credit (Matt Pocock's original `handoff`) and install / use instructions.*
 
 ## When to invoke
 

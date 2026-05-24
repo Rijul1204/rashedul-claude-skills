@@ -7,7 +7,7 @@ description: Interview the user relentlessly about a plan, design, or approach u
 
 Interview the user relentlessly about every aspect of a plan, design, or approach until shared understanding lands. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For every question, supply your recommended answer + the rationale + what changes if the opposite is chosen.
 
-> **Inspired by** Matt Pocock's [`grill-me`](https://github.com/mattpocock/skills/blob/main/skills/productivity/grill-me/SKILL.md) skill. The framing — interviewing the user as a peer rather than executing on their first instinct — is his. This version extends it with the peer-programmer philosophy block, the workflow phases, bad-vs-good grill examples, and a composes-with table linking the skills this drives.
+*See [README.md](README.md) for the credit (Matt Pocock's original `grill-me`) and install / use instructions.*
 
 ## Philosophy: peer programmer, not executor
 
