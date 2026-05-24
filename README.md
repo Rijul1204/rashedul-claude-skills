@@ -160,7 +160,7 @@ The repo started as a skills-only collection and is expanding into a broader hom
 ## Agents
 
 > **[`quality-gates`](agents/quality-gates.md)**
-> Runs the repo's quality gates (lint, format:check, typecheck, knip, scoped vitest) and returns a concise pass/fail report. Delegate after writing or editing TS/TSX so the verbose tool output stays out of the parent context. Read-only — never edits code, never bypasses checks.
+> Runs the repo's quality gates (lint, format:check, typecheck, knip, scoped vitest) and returns a concise pass/fail report. Delegate **once per slice / PR, immediately before commit** — not mid-iteration. Pre-run the auto-formatter on touched files locally so a trivial format violation doesn't burn a gates re-run. Read-only — never edits code, never bypasses checks.
 > _Delegate to: `quality-gates` subagent with a scope (which packages were touched, optionally which test files)._
 
 > [!TIP]
