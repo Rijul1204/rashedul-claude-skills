@@ -191,6 +191,10 @@ Shareable GitHub Actions templates. Each entry is a self-contained folder mirror
 > Runs the [Cursor Agent](https://docs.cursor.com/agents) against every PR diff and posts a single sticky review comment with grade + verdict + action items. Sticky-comment design means re-runs update the existing comment instead of stacking new ones. Manually re-triggerable via `/cursor-review` comment or `workflow_dispatch`.
 > _Install: see [`workflows/cursor-review/README.md`](workflows/cursor-review/README.md). Requires a `CURSOR_API_KEY` secret on the target repo._
 
+> **[`claude-code-review/`](workflows/claude-code-review)**
+> Sibling template using [Claude Code](https://docs.claude.com/en/docs/claude-code) instead of cursor-agent. Same structure, same trigger surface, distinct sticky-comment marker so both can co-exist on the same PR. Configurable `CLAUDE_MODEL` for cost/quality tuning (Opus / Sonnet / Haiku).
+> _Install: see [`workflows/claude-code-review/README.md`](workflows/claude-code-review/README.md). Requires an `ANTHROPIC_API_KEY` secret on the target repo._
+
 > [!NOTE]
 > These templates are **not active on this repo** — they live under `workflows/<name>/.github/` (one level down) so GitHub Actions doesn't pick them up here. Copy the inner `.github/` tree into your own repo's root to activate.
 

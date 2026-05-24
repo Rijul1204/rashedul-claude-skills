@@ -1,0 +1,480 @@
+name: Automated Code Review
+
+# ============================================================================
+# CONFIGURATION & REQUIREMENTS
+# ============================================================================
+# This workflow requires ANTHROPIC_API_KEY secret to be configured in GitHub repository settings
+#
+# Setup Instructions:
+# 1. Go to Settings → Secrets and variables → Actions
+# 2. Add new secret: ANTHROPIC_API_KEY
+# 3. Value: Your API key from Anthropic Console → API Keys (https://console.anthropic.com/)
+#
+# GITHUB_TOKEN is automatically provided by GitHub Actions (no setup needed)
+#
+# ============================================================================
+# TRIGGERS
+# ============================================================================
+# Automatic triggers:
+#   - PR opened: Runs automatically when a new PR is created
+#   - PR synchronized: Runs when new commits are pushed to an existing PR
+#   - PR reopened: Runs when a closed PR is reopened
+#
+# Manual triggers (comment on PR):
+#   - "claude review this code"
+#   - "claude review"
+#   - "/claude-review"
+#
+# ============================================================================
+# BEHAVIOR
+# ============================================================================
+# - Reviews ONLY the changed files in the PR (not the entire repository)
+# - Posts review as a comment on the PR
+# - Updates existing review comment on subsequent runs (avoids spam)
+# - Runs with 15-minute timeout to prevent hanging
+# - Loads modular instruction files from .github/instructions/
+#
+# ============================================================================
+# LIMITATIONS & CONSIDERATIONS
+# ============================================================================
+# - Rate limits: Subject to Anthropic API rate limits (check Anthropic Console)
+# - Costs: Incurs Anthropic API usage costs per review (Opus / Sonnet / Haiku)
+# - Runtime: Typically 2-5 minutes depending on PR size
+# - Fork behavior: Does not run on PRs from forks (secret access restricted)
+# - Large diffs: Very large PRs may exceed API limits or timeout
+#
+# ============================================================================
+# TROUBLESHOOTING
+# ============================================================================
+# If the workflow fails:
+# 1. Check ANTHROPIC_API_KEY is configured correctly
+# 2. Verify API key has not expired
+# 3. Check workflow logs in the Actions tab
+# 4. Ensure Anthropic API is accessible (not rate limited)
+# 5. For large PRs, consider breaking into smaller changes
+#
+# Common errors:
+# - "ANTHROPIC_API_KEY not set": Add the secret in repository settings
+# - "claude: command not found": Installation step failed
+# - "timeout": PR is too large or API is slow, try manual trigger later
+# ============================================================================
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["*"]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: number
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent workflow from running indefinitely
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Check if comment trigger
+        id: check-trigger
+        if: github.event_name == 'issue_comment'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const comment = context.payload.comment.body.toLowerCase();
+            const triggerPhrases = ['claude review this code', 'claude review', '/claude-review'];
+            const isTrigger = triggerPhrases.some(phrase => comment.includes(phrase));
+
+            if (isTrigger && context.payload.issue.pull_request) {
+              core.setOutput('triggered', 'true');
+              const prNum = context.payload.issue.number;
+              if (typeof prNum === 'number' && prNum > 0) {
+                core.setOutput('pr_number', prNum.toString());
+              } else {
+                core.setFailed('Invalid PR number');
+              }
+            } else {
+              core.setOutput('triggered', 'false');
+            }
+
+      - name: Skip if not triggered by comment
+        if: github.event_name == 'issue_comment' && steps.check-trigger.outputs.triggered != 'true'
+        run: |
+          echo "Comment does not contain trigger phrase or is not on a PR. Skipping."
+          exit 0
+
+      - name: Get PR details for comment trigger
+        id: get-pr-details
+        if: github.event_name == 'issue_comment' && steps.check-trigger.outputs.triggered == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumberOutput = '${{ steps.check-trigger.outputs.pr_number }}' || '';
+            const { owner, repo } = context.repo;
+
+            if (!prNumberOutput || prNumberOutput === '' || prNumberOutput === 'undefined' || isNaN(parseInt(prNumberOutput, 10))) {
+              core.setFailed('PR number not found or invalid');
+              return;
+            }
+            const prNumber = prNumberOutput;
+
+            const pr = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: parseInt(prNumber, 10),
+            });
+
+            core.setOutput('pr_number', prNumber);
+            core.setOutput('base_sha', pr.data.base.sha);
+            core.setOutput('head_sha', pr.data.head.sha);
+            core.setOutput('pr_branch', pr.data.head.ref);
+            core.setOutput('base_branch', pr.data.base.ref);
+
+      - name: Determine checkout ref
+        id: checkout-ref
+        run: |
+          if [ "${{ github.event_name }}" == "issue_comment" ]; then
+            REF="${{ steps.get-pr-details.outputs.pr_branch }}"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            REF="refs/pull/${{ inputs.pr_number }}/head"
+          elif [ -n "${{ github.event.pull_request.head.ref }}" ]; then
+            REF="${{ github.event.pull_request.head.ref }}"
+          else
+            REF="${{ github.ref }}"
+          fi
+          echo "ref=${REF}" >> $GITHUB_OUTPUT
+          echo "Checking out ref: ${REF}"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+          ref: ${{ steps.checkout-ref.outputs.ref }}
+
+      - name: Load Claude Code Config
+        run: |
+          if [ -f .github/claude-code-config.env ]; then
+            grep -v '^#' .github/claude-code-config.env | grep -v '^$' >> $GITHUB_ENV || true
+          fi
+
+      - name: Cache npm prefix
+        id: cache-npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: claude-code-npm-${{ runner.os }}-${{ hashFiles('.github/scripts/install_claude_code.sh', '.github/claude-code-config.env') }}
+          restore-keys: |
+            claude-code-npm-${{ runner.os }}-
+
+      - name: Install Claude Code CLI
+        run: |
+          chmod +x .github/scripts/install_claude_code.sh
+          .github/scripts/install_claude_code.sh
+
+      - name: Verify Claude Code CLI
+        run: |
+          if ! command -v claude &> /dev/null; then
+            echo "::error::claude not found in PATH"
+            exit 1
+          fi
+
+          echo "✓ claude is available"
+          claude --version || echo "Note: version check returned non-zero, but binary exists"
+
+      - name: Validate ANTHROPIC_API_KEY
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::ANTHROPIC_API_KEY secret is not set"
+            echo "Please add ANTHROPIC_API_KEY in repository Settings → Secrets and variables → Actions"
+            echo "Get your API key from: https://console.anthropic.com/ → API Keys"
+            exit 1
+          fi
+          echo "ANTHROPIC_API_KEY is configured"
+
+      - name: Get changed files diff
+        id: get-diff
+        run: |
+          if [ "${{ github.event_name }}" == "issue_comment" ]; then
+            BASE_SHA="${{ steps.get-pr-details.outputs.base_sha }}"
+            HEAD_SHA="${{ steps.get-pr-details.outputs.head_sha }}"
+            PR_NUMBER="${{ steps.get-pr-details.outputs.pr_number }}"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            PR_NUMBER="${{ inputs.pr_number }}"
+            git fetch origin "pull/${PR_NUMBER}/head:pr-${PR_NUMBER}" || {
+              echo "::error::Failed to fetch PR ${PR_NUMBER}"
+              exit 1
+            }
+            BASE_SHA=$(git merge-base origin/${{ github.event.repository.default_branch }} "pr-${PR_NUMBER}")
+            HEAD_SHA=$(git rev-parse "pr-${PR_NUMBER}")
+          else
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+          fi
+
+          if [ -z "${BASE_SHA}" ] || [ -z "${HEAD_SHA}" ] || [ "${BASE_SHA}" = "null" ] || [ "${HEAD_SHA}" = "null" ]; then
+            echo "::error::Base or head SHA not found or invalid"
+            echo "::error::BASE_SHA=${BASE_SHA}, HEAD_SHA=${HEAD_SHA}"
+            exit 1
+          fi
+
+          echo "Comparing ${BASE_SHA}...${HEAD_SHA}"
+
+          if ! git diff --name-only --diff-filter=ACMR -z "${BASE_SHA}" "${HEAD_SHA}" > changed_files_null.txt; then
+            echo "::warning::Failed to get list of changed files, continuing with empty list"
+            touch changed_files_null.txt
+          fi
+
+          tr '\0' '\n' < changed_files_null.txt > changed_files.txt
+
+          if ! git diff "${BASE_SHA}" "${HEAD_SHA}" > pr_diff.txt; then
+            echo "::warning::Failed to generate diff, review may be incomplete"
+            touch pr_diff.txt
+          fi
+
+          DIFF_LINES=$(wc -l < pr_diff.txt)
+          CHANGED_FILE_COUNT=$(wc -l < changed_files.txt)
+
+          echo "Changed files: ${CHANGED_FILE_COUNT}"
+          echo "Diff lines: ${DIFF_LINES}"
+
+          echo "diff_length=${DIFF_LINES}" >> $GITHUB_OUTPUT
+          echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "changed_files=$(cat changed_files.txt | tr '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
+
+      - name: Assemble Review Guidelines from Modules
+        run: |
+          if [ ! -s pr_diff.txt ]; then
+            echo "No code changes detected in this pull request." > code_review.txt
+            exit 0
+          fi
+
+          # Build complete review guidelines by expanding module references
+          {
+            echo "IMPORTANT: You are reviewing ONLY the code changes shown in the diff below."
+            echo "Do NOT review any other files in the repository. Focus exclusively on the changes provided."
+            echo ""
+            echo "Changed files in this PR:"
+            cat changed_files.txt | tr '\n' ' '
+            echo ""
+            echo ""
+
+            # Process main instructions file and expand {{MODULE:...}} references
+            if [ -f .github/instructions/code-review.instructions.md ]; then
+              while IFS= read -r line; do
+                if [[ "$line" =~ \{\{MODULE:([^}]+)\}\} ]]; then
+                  module_file="${BASH_REMATCH[1]}"
+
+                  # Validate no path traversal
+                  if [[ "$module_file" == *".."* ]] || [[ "$module_file" == /* ]]; then
+                    echo "::warning::Invalid module reference: $module_file"
+                    continue
+                  fi
+
+                  module_path=".github/instructions/modules/${module_file}"
+                  if [ -f "$module_path" ]; then
+                    echo ""
+                    cat "$module_path"
+                    echo ""
+                  else
+                    echo "::warning::Module file not found: $module_path"
+                  fi
+                else
+                  echo "$line"
+                fi
+              done < .github/instructions/code-review.instructions.md
+            else
+              echo "::error::Main instructions file not found"
+              echo "ERROR: Review guidelines not found. Please check the repository configuration."
+            fi
+
+            echo ""
+            echo "=== CODE CHANGES TO REVIEW ==="
+            echo ""
+            cat pr_diff.txt
+          } > review_prompt.txt
+
+      - name: Run Claude Code for Code Review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: ${{ env.CLAUDE_MODEL }}
+        run: |
+          if [ ! -s pr_diff.txt ]; then
+            echo "No code changes to review." > code_review.txt
+            exit 0
+          fi
+
+          # Build optional --model flag from env (set via claude-code-config.env)
+          MODEL_FLAG=""
+          if [ -n "${CLAUDE_MODEL:-}" ]; then
+            MODEL_FLAG="--model ${CLAUDE_MODEL}"
+          fi
+
+          # Run claude in print/non-interactive mode with a 10-minute timeout
+          if timeout 600 claude --print --output-format text ${MODEL_FLAG} < review_prompt.txt > code_review.txt 2>&1; then
+            echo "Review completed successfully"
+          else
+            EXIT_CODE=$?
+            if [ "${EXIT_CODE}" -eq 124 ]; then
+              echo "::warning::claude timed out after 10 minutes"
+              echo "Claude Code review timed out. The PR may be too large. Consider breaking it into smaller changes." > code_review.txt
+            else
+              echo "::warning::claude exited with code ${EXIT_CODE}"
+              if [ ! -s code_review.txt ]; then
+                echo "Claude Code review encountered an error. Check the workflow logs for details." > code_review.txt
+              fi
+            fi
+          fi
+
+      - name: Post Review as PR Comment
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            let prNumber;
+            const eventName = process.env.GITHUB_EVENT_NAME;
+
+            if (eventName === 'issue_comment') {
+              const prNumStr = '${{ steps.get-pr-details.outputs.pr_number }}' || '';
+              if (!prNumStr || prNumStr === '' || prNumStr === 'undefined') {
+                core.setFailed('PR number not available from comment trigger');
+                return;
+              }
+              prNumber = parseInt(prNumStr, 10);
+              if (isNaN(prNumber) || prNumber <= 0) {
+                core.setFailed('Could not parse PR number from comment trigger');
+                return;
+              }
+            } else if (eventName === 'workflow_dispatch') {
+              prNumber = ${{ inputs.pr_number || 0 }};
+              if (!prNumber || prNumber <= 0) {
+                core.setFailed('Invalid PR number from workflow_dispatch');
+                return;
+              }
+            } else {
+              prNumber = context.payload.pull_request?.number || context.issue?.number;
+              if (!prNumber || isNaN(prNumber) || prNumber <= 0) {
+                core.setFailed('Could not determine PR number from pull_request event');
+                core.info(`context.payload.pull_request: ${JSON.stringify(context.payload.pull_request)}`);
+                core.info(`context.issue: ${JSON.stringify(context.issue)}`);
+                return;
+              }
+            }
+
+            core.info(`Processing PR #${prNumber}`);
+
+            let reviewContent;
+            try {
+              reviewContent = fs.readFileSync('code_review.txt', 'utf8');
+            } catch (error) {
+              reviewContent = 'Unable to generate code review. Please check the workflow logs for details.';
+              core.warning(`Failed to read review file: ${error.message}`);
+            }
+
+            if (!reviewContent || reviewContent.trim().length === 0) {
+              reviewContent = 'No review feedback generated.';
+            }
+
+            const { owner, repo } = context.repo;
+            const pr = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+            const prUrl = pr.data.html_url;
+
+            const triggerSource = process.env.GITHUB_EVENT_NAME === 'issue_comment'
+              ? 'manually triggered via comment'
+              : 'automatically triggered';
+
+            const uniqueMarker = '<!-- claude-auto-review-bot -->';
+            const commentBody = uniqueMarker + '\n' +
+              '## 🤖 Automated Code Review (via Claude Code)\n\n' +
+              reviewContent + '\n\n' +
+              '---\n' +
+              '*This review was ' + triggerSource + ' by Claude Code. For questions or issues, check the [workflow logs](' + prUrl + '/checks).*';
+
+            // Find existing review comment with pagination support
+            let existingComment = null;
+            let page = 1;
+            const perPage = 100;
+            const maxPages = 10;
+
+            const issueData = await github.rest.issues.get({
+              owner,
+              repo,
+              issue_number: prNumber,
+            });
+            const totalComments = issueData.data.comments || 0;
+            core.info(`PR has ${totalComments} total comments`);
+
+            if (totalComments > 0) {
+              while (page <= maxPages) {
+                try {
+                  const comments = await github.rest.issues.listComments({
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    per_page: perPage,
+                    page: page,
+                  });
+
+                  if (comments.data.length === 0) break;
+
+                  existingComment = comments.data.find(
+                    comment => comment.user?.login === 'github-actions[bot]' &&
+                    comment.body?.includes(uniqueMarker)
+                  );
+
+                  if (existingComment) {
+                    core.info(`Found existing comment on page ${page}`);
+                    break;
+                  }
+
+                  if (comments.data.length < perPage) break;
+
+                  page++;
+                } catch (error) {
+                  core.warning(`Failed to fetch comments page ${page}: ${error.message}`);
+                  break;
+                }
+              }
+
+              if (page > maxPages) {
+                core.warning(`Reached maximum page limit (${maxPages}), may have missed existing comment`);
+              }
+            }
+
+            if (existingComment) {
+              core.info(`Updating existing review comment (ID: ${existingComment.id})`);
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existingComment.id,
+                body: commentBody
+              });
+            } else {
+              core.info('Creating new review comment');
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }
+
+            core.info('Review comment posted successfully');
