@@ -37,6 +37,8 @@ Before declaring a task complete, review what you built through three perspectiv
 2. **Product engineer** — Does it actually solve the user's job? Does the data model match the user's mental model? Is the flow the shortest path to the outcome?
 3. **UI/UX expert** — Mobile readable? Loading and empty states present? Keyboard nav + accessibility (labels, focus order, contrast) accounted for? *If the change has no UI, skip this lens explicitly rather than omitting it.*
 
+> For PRs with broader surface (UI + UX + AI-integration in one change) or higher-stakes work, escalate to [`multi-lens-review`](multi-lens-review.md) — six lenses (engineer / product engineer / UI engineer / UX engineer / product owner / AI-integration engineer), each with an explained confidence score, and every file in the diff covered. The three lenses above are the lightweight default; `multi-lens-review` is the rigor pass.
+
 ## Sprint-end validation gate
 
 After every task in a sprint is complete, validate the whole sprint end-to-end **before** asking the user for the go-ahead to start the next sprint:
@@ -76,4 +78,5 @@ Don't capture every detail — only what a future agent would otherwise have to 
 | [`grill-me`](../skills/grill-me/SKILL.md) | When confidence on a task is < 90% and the missing decision lives in the user's head. |
 | [`quality-gates`](../agents/quality-gates.md) | After each task and at the sprint-end validation gate. |
 | [`pair-agent-harness`](../skills/pair-agent-harness/SKILL.md) | When the senior-engineer review lens flags something you want a second opinion on before fixing. |
+| [`multi-lens-review`](multi-lens-review.md) | Deeper six-lens variant of the three-lens review above. Reach for it when the change has broader surface (UI + UX + AI integration in one PR) or higher stakes. |
 | [`handoff`](../skills/handoff/SKILL.md) | At sprint boundaries if the next sprint will run in a fresh session. |

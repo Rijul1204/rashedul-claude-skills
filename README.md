@@ -181,6 +181,9 @@ Paste-ready prompt fragments — one rule per file, kebab-case name, body is the
 > **[`sprint-execution-protocol`](prompts/sprint-execution-protocol.md)**
 > Multi-step delivery contract for running a sprint-shaped plan. Every task carries Context / Scope / DoD / Acceptance Criteria / Testing Step, gets a confidence score (< 90% triggers a `grill-me` escalation), passes three review lenses (senior engineer, product engineer, UI/UX), and the whole sprint passes a UI walk-through + server-log + API + quality-gates validation before the user's go-ahead unlocks the next sprint. Composes with [`srs-to-delivery-plan`](skills/srs-to-delivery-plan/SKILL.md), [`grill-me`](skills/grill-me/SKILL.md), [`quality-gates`](agents/quality-gates.md), [`pair-agent-harness`](skills/pair-agent-harness/SKILL.md), and [`handoff`](skills/handoff/SKILL.md).
 
+> **[`multi-lens-review`](prompts/multi-lens-review.md)**
+> Stress-test a PR or design through **six senior-reviewer hats**: senior engineer, senior product engineer, senior UI engineer, senior UX engineer, product owner, and AI-integration engineer. Each lens reports a confidence score with **explained reasoning** (bare numbers are invalid); any score below 90% must name the gap; no file in the diff goes unreviewed. Deeper variant of the three-lens review baked into `sprint-execution-protocol`.
+
 ---
 
 ## Workflows

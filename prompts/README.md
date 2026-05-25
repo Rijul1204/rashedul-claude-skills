@@ -26,6 +26,7 @@ Anti-patterns: anything project-specific (lives in that project's CLAUDE.md), an
 | [`pyramid-response.md`](pyramid-response.md) | Forces pyramid-principle responses — recommendation in sentences 1-3, justification after. |
 | [`docs-probe-before-code.md`](docs-probe-before-code.md) | Pre-arms a third-party-integration conversation to follow docs → probe → fixture → code. |
 | [`sprint-execution-protocol.md`](sprint-execution-protocol.md) | Multi-step delivery contract: per-task fields, confidence scoring, three-lens review, sprint-end validation gate. Composes with `srs-to-delivery-plan`, `grill-me`, `quality-gates`. |
+| [`multi-lens-review.md`](multi-lens-review.md) | Six-lens senior-panel review (engineer / product engineer / UI engineer / UX engineer / product owner / AI-integration engineer). Each lens reports a confidence score with explained reasoning; < 90% requires a stated "why"; no file in the diff goes unreviewed. Deeper variant of the 3-lens review in `sprint-execution-protocol`. |
 
 ## How to use
 
